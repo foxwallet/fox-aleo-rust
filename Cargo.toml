@@ -26,31 +26,43 @@ path = "rust"
 default-features = false
 
 [workspace.dependencies.snarkvm]
-version = "=0.14.6"
+#version = "=0.14.6"
+path = "../fox-snarkvm"
 
 [workspace.dependencies.snarkvm-circuit-network]
-version = "=0.14.6"
+#version = "=0.14.6"
+path = "../fox-snarkvm/circuit/network"
 
 [workspace.dependencies.snarkvm-console]
-version = "=0.14.6"
+#version = "=0.14.6"
+path = "../fox-snarkvm/console"
 
 [workspace.dependencies.snarkvm-console-network]
-version = "=0.14.6"
+#version = "=0.14.6"
+path = "../fox-snarkvm/console/network"
 
 [workspace.dependencies.snarkvm-synthesizer]
-version = "=0.14.6"
+#version = "=0.14.6"
+path = "../fox-snarkvm/synthesizer"
 
 [workspace.dependencies.snarkvm-ledger-block]
-version = "=0.14.6"
+#version = "=0.14.6"
+path = "../fox-snarkvm/ledger/block"
 
 [workspace.dependencies.snarkvm-ledger-store]
-version = "=0.14.6"
+#version = "=0.14.6"
+path = "../fox-snarkvm/ledger/store"
 
 [workspace.dependencies.snarkvm-ledger-query]
-version = "=0.14.6"
+#version = "=0.14.6"
+path = "../fox-snarkvm/ledger/query"
 
-[workspace.dependencies.snarkvm-wasm]
-version = "=0.14.6"
+[workspace.dependencies.snarkvm-fields]
+#version = "=0.14.6"
+path = "../fox-snarkvm/fields"
+
+#[workspace.dependencies.snarkvm-wasm]
+#version = "=0.14.6"
 
 [lib]
 path = "cli/lib.rs"

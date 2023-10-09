@@ -22,7 +22,7 @@ impl<N: Network> ProgramManager<N> {
         &mut self,
         program_id: impl TryInto<ProgramID<N>>,
         priority_fee: u64,
-        fee_record: Record<N, Plaintext<N>>,
+        fee_record: Option<Record<N, Plaintext<N>>>,
         password: Option<&str>,
     ) -> Result<String> {
         // Ensure a network client is configured, otherwise deployment is not possible
@@ -127,7 +127,7 @@ impl<N: Network> ProgramManager<N> {
         program: &Program<N>,
         private_key: &PrivateKey<N>,
         priority_fee: u64,
-        fee_record: Record<N, Plaintext<N>>,
+        fee_record: Option<Record<N, Plaintext<N>>>,
         node_url: String,
         api_client: &AleoAPIClient<N>,
     ) -> Result<Transaction<N>> {
@@ -139,7 +139,7 @@ impl<N: Network> ProgramManager<N> {
         let vm = Self::initialize_vm(api_client, program, false)?;
 
         // Create the deployment transaction
-        vm.deploy(private_key, program, (fee_record, priority_fee), Some(query), rng)
+        vm.deploy(private_key, program, fee_record, priority_fee, Some(query), rng)
     }
 
     /// Estimate deployment fee for a program in microcredits. The result will be in the form

@@ -28,7 +28,7 @@ impl<N: Network> ProgramManager<N> {
         transfer_type: TransferType,
         password: Option<&str>,
         amount_record: Option<Record<N, Plaintext<N>>>,
-        fee_record: Record<N, Plaintext<N>>,
+        fee_record: Option<Record<N, Plaintext<N>>>,
     ) -> Result<String> {
         // Ensure records provided have enough credits to cover the transfer amount and fee
         if let Some(amount_record) = amount_record.as_ref() {
@@ -37,7 +37,11 @@ impl<N: Network> ProgramManager<N> {
                 "Credits in amount record must greater than transfer amount specified"
             );
         }
-        ensure!(fee_record.microcredits()? >= fee, "Fee must be greater than the fee specified in the record");
+
+        if let Some(fee_record) = fee_record.as_ref() {
+            ensure!(fee_record.microcredits()? >= fee, "Fee must be greater than the fee specified in the record");
+        }
+
 
         // Specify the network state query
         let query = Query::from(self.api_client.as_ref().unwrap().base_url());
@@ -94,13 +98,13 @@ impl<N: Network> ProgramManager<N> {
                     }
                 }
             };
-
             // Create a new transaction.
             vm.execute(
                 &private_key,
                 ("credits.aleo", transfer_function),
                 inputs.iter(),
-                Some((fee_record, fee)),
+                fee_record,
+                fee,
                 Some(query),
                 rng,
             )?

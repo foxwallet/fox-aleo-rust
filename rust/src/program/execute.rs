@@ -97,7 +97,7 @@ impl<N: Network> ProgramManager<N> {
         function: impl TryInto<Identifier<N>>,
         inputs: impl ExactSizeIterator<Item = impl TryInto<Value<N>>>,
         priority_fee: u64,
-        fee_record: Record<N, Plaintext<N>>,
+        fee_record: Option<Record<N, Plaintext<N>>>,
         password: Option<&str>,
     ) -> Result<String> {
         // Ensure a network client is set, otherwise online execution is not possible
@@ -151,7 +151,7 @@ impl<N: Network> ProgramManager<N> {
         private_key: &PrivateKey<N>,
         priority_fee: u64,
         inputs: impl ExactSizeIterator<Item = impl TryInto<Value<N>>>,
-        fee_record: Record<N, Plaintext<N>>,
+        fee_record: Option<Record<N, Plaintext<N>>>,
         program: &Program<N>,
         function: impl TryInto<Identifier<N>>,
         node_url: String,
@@ -174,7 +174,7 @@ impl<N: Network> ProgramManager<N> {
         let vm = Self::initialize_vm(api_client, program, true)?;
 
         // Create an execution transaction
-        vm.execute(private_key, (program_id, function_name), inputs, Some((fee_record, priority_fee)), Some(query), rng)
+        vm.execute(private_key, (program_id, function_name), inputs, fee_record, priority_fee, Some(query), rng)
     }
 
     /// Estimate the cost of executing a program with the given inputs in microcredits. The response
@@ -227,8 +227,8 @@ impl<N: Network> ProgramManager<N> {
     /// Disclaimer: Fee estimation is experimental and may not represent a correct estimate on any current or future network
     pub fn estimate_finalize_fee(&self, program: &Program<N>, function: impl TryInto<Identifier<N>>) -> Result<u64> {
         let function_name = function.try_into().map_err(|_| anyhow!("Invalid function name"))?;
-        match program.get_function(&function_name)?.finalize() {
-            Some((_, finalize)) => cost_in_microcredits(finalize),
+        match program.get_function(&function_name)?.finalize_logic() {
+            Some(finalize) => cost_in_microcredits(finalize),
             None => Ok(0u64),
         }
     }

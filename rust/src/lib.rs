@@ -195,8 +195,8 @@ pub mod snarkvm_types {
     pub use snarkvm_circuit_network::{Aleo, AleoV0};
     pub use snarkvm_console::{
         account::{Address, PrivateKey, Signature, ViewKey},
-        network::Testnet3,
-        prelude::{ToBytes, Uniform},
+        network::{Testnet3, Environment},
+        prelude::{FromBytes, ToBytes, Uniform, FromFields, ToField},
         program::{
             Ciphertext,
             EntryType,
@@ -214,8 +214,9 @@ pub mod snarkvm_types {
             Value,
             ValueType,
         },
-        types::Field,
+        types::{Field},
     };
+    pub use snarkvm_fields::{PrimeField};
     pub use snarkvm_ledger_block::{Block, Deployment, Execution, Transaction};
     pub use snarkvm_ledger_query::Query;
     pub use snarkvm_ledger_store::{
@@ -240,9 +241,9 @@ use snarkvm::{file::Manifest, package::Package};
 pub use snarkvm_types::*;
 
 use anyhow::{anyhow, bail, ensure, Error, Result};
-use indexmap::{IndexMap, IndexSet};
+pub use indexmap::{IndexMap, IndexSet};
 use once_cell::sync::OnceCell;
-use snarkvm_console::program::Entry;
+pub use snarkvm_console::program::Entry;
 #[cfg(feature = "full")]
 use std::{
     convert::TryInto,

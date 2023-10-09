@@ -36,6 +36,12 @@ pub use resolver::*;
 pub mod transfer;
 pub use transfer::*;
 
+pub mod split;
+pub use split::*;
+
+pub mod join;
+pub use join::*;
+
 /// Program management object for loading programs for building, execution, and deployment
 ///
 /// This object is meant to be a software abstraction that can be consumed by software like
