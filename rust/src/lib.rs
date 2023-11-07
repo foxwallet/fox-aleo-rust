@@ -210,9 +210,11 @@ pub mod snarkvm_types {
             ProgramID,
             ProgramOwner,
             Record,
+            RecordType,
             Response,
             Value,
             ValueType,
+            StructType,
         },
         types::{Field},
     };
