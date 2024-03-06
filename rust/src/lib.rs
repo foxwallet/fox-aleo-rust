@@ -236,6 +236,7 @@ pub mod snarkvm_types {
         Trace,
         VM,
     };
+    pub use snarkvm_utilities::bits::ToBits;
 }
 #[cfg(feature = "full")]
 use snarkvm::{file::Manifest, package::Package};

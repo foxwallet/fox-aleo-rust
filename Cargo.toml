@@ -61,6 +61,10 @@ path = "../fox-snarkvm/ledger/query"
 #version = "=0.14.6"
 path = "../fox-snarkvm/fields"
 
+[workspace.dependencies.snarkvm-utilities]
+#version = "=0.14.6"
+path = "../fox-snarkvm/utilities"
+
 #[workspace.dependencies.snarkvm-wasm]
 #version = "=0.14.6"
 

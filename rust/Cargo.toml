@@ -76,6 +76,9 @@ workspace = true
 [dependencies.snarkvm-fields]
 workspace = true
 
+[dependencies.snarkvm-utilities]
+workspace = true
+
 [dependencies.getrandom]
 version = "0.2"
 features = [ "js" ]
