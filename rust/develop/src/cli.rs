@@ -49,13 +49,13 @@ pub enum Command {
         /// `private key` to create program deployment and execution transactions on
         /// the Aleo Network.
         #[clap(short, long)]
-        key_ciphertext: Option<Ciphertext<Testnet3>>,
+        key_ciphertext: Option<Ciphertext<TestnetV0>>,
         /// Uri and port the development server will listen on [default: 0.0.0.0:4040]
         #[clap(short = 'a', long)]
         server_address: Option<SocketAddr>,
-        /// Aleo Network peer uri to connect to [default: https://vm.aleo.org/api].
+        /// Aleo Network peer uri to connect to [default:  https://api.explorer.aleo.org/v1].
         /// This is the peer the development server will send its completed deploy
-        /// and execute transactions to. The peer must be running the testnet3 api
+        /// and execute transactions to. The peer must be running the testnet api
         /// <https://developer.aleo.org/testnet/getting_started/overview/> in order
         /// for the development server to successfully send transactions to the Aleo
         /// Network.
@@ -68,7 +68,7 @@ pub enum Command {
 }
 
 impl Command {
-    pub fn parse(self) -> Result<Rest<Testnet3>> {
+    pub fn parse(self) -> Result<Rest<TestnetV0>> {
         match self {
             Command::Start { server_address, key_ciphertext: key, peer, debug } => {
                 Rest::initialize(server_address, key, peer, debug)

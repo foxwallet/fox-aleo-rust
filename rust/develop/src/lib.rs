@@ -47,7 +47,7 @@
 //!
 //! Once installed the following command can be used to start the server:
 //!
-//! `aleo-develop start` - Start the server at `0.0.0.0:4040` (by default the server sends transactions to the Aleo testnet3 network)
+//! `aleo-develop start` - Start the server at `0.0.0.0:4040` (by default the server sends transactions to the Aleo testnet network)
 //!
 //! `aleo-develop start --help` - Show all available options for configuring the server
 //!
@@ -155,7 +155,7 @@ use snarkvm::{
         account::{Address, PrivateKey},
         program::{Ciphertext, Identifier, Plaintext, ProgramID, Record},
     },
-    prelude::{Network, Testnet3},
+    prelude::{Network, TestnetV0},
     synthesizer::Program,
 };
 use tracing_subscriber::fmt;
@@ -191,11 +191,11 @@ impl<N: Network> Rest<N> {
         // If no socket address was specified, use the default of 0.0.0.0:4040
         let socket_address = socket_address.unwrap_or_else(|| SocketAddr::from(([0, 0, 0, 0], 4040)));
 
-        // If no peer url was specified, use the default of https://vm.aleo.org/api
-        let peer = peer_url.unwrap_or("https://vm.aleo.org/api".to_string());
+        // If no peer url was specified, use the default of  https://api.explorer.aleo.org/v1
+        let peer = peer_url.unwrap_or(" https://api.explorer.aleo.org/v1".to_string());
 
         // Initialize an API client configured for the specified network.
-        let api_client = AleoAPIClient::new(&peer, "testnet3")?;
+        let api_client = AleoAPIClient::new(&peer, "testnet")?;
         let record_finder = RecordFinder::new(api_client.clone());
 
         let key_warning = if private_key_ciphertext.is_some() {

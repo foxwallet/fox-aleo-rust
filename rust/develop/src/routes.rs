@@ -21,7 +21,7 @@ impl<N: Network> Rest<N> {
     pub fn routes(&self) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
         // POST /deploy
         let deploy = warp::post()
-            .and(warp::path!("testnet3" / "deploy"))
+            .and(warp::path!("testnet" / "deploy"))
             .and(warp::body::content_length_limit(16 * 1024 * 1024))
             .and(warp::body::json())
             .and(with(self.record_finder.clone()))
@@ -31,7 +31,7 @@ impl<N: Network> Rest<N> {
 
         // POST /execute
         let execute = warp::post()
-            .and(warp::path!("testnet3" / "execute"))
+            .and(warp::path!("testnet" / "execute"))
             .and(warp::body::content_length_limit(16 * 1024 * 1024))
             .and(warp::body::json())
             .and(with(self.record_finder.clone()))
@@ -41,7 +41,7 @@ impl<N: Network> Rest<N> {
 
         // POST /transfer
         let transfer = warp::post()
-            .and(warp::path!("testnet3" / "transfer"))
+            .and(warp::path!("testnet" / "transfer"))
             .and(warp::body::content_length_limit(16 * 1024 * 1024))
             .and(warp::body::json())
             .and(with(self.record_finder.clone()))
@@ -82,7 +82,7 @@ impl<N: Network> Rest<N> {
     // If a separate peer url is provided in the request, use that instead of the one in the config
     fn get_api_client(api_client: AleoAPIClient<N>, peer_url: &Option<String>) -> Result<AleoAPIClient<N>, Rejection> {
         if let Some(peer_url) = peer_url {
-            AleoAPIClient::new(peer_url, "testnet3").or_reject()
+            AleoAPIClient::new(peer_url, "testnet").or_reject()
         } else {
             Ok(api_client)
         }

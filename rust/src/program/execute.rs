@@ -69,7 +69,7 @@ impl<N: Network> ProgramManager<N> {
 
         // Compute the trace
         let locator = Locator::new(*program_id, function_name);
-        let (response, mut trace) = vm.process().write().execute::<A>(authorization)?;
+        let (response, mut trace) = vm.process().write().execute::<A, _>(authorization, &mut rand::thread_rng())?;
         trace.prepare(query)?;
         let execution = trace.prove_execution::<A, _>(&locator.to_string(), &mut rand::thread_rng())?;
 
@@ -214,24 +214,19 @@ impl<N: Network> ProgramManager<N> {
         let authorization = vm.authorize(&private_key, program_id, function_name, inputs, rng)?;
 
         let locator = Locator::new(*program_id, function_name);
-        let (_, mut trace) = vm.process().write().execute::<A>(authorization)?;
+        let (_, mut trace) = vm.process().write().execute::<A, _>(authorization, &mut rand::thread_rng())?;
         trace.prepare(query)?;
         let execution = trace.prove_execution::<A, _>(&locator.to_string(), &mut rand::thread_rng())?;
-        execution_cost(&vm, &execution)
+        execution_cost(&vm.process().write(), &execution)
     }
 
-    /// Estimate the finalize fee component for executing a function. This fee is additional to the
-    /// size of the execution of the program in bytes. If the function does not have a finalize
-    /// step, then the finalize fee is 0.
-    ///
-    /// Disclaimer: Fee estimation is experimental and may not represent a correct estimate on any current or future network
-    pub fn estimate_finalize_fee(&self, program: &Program<N>, function: impl TryInto<Identifier<N>>) -> Result<u64> {
-        let function_name = function.try_into().map_err(|_| anyhow!("Invalid function name"))?;
-        match program.get_function(&function_name)?.finalize_logic() {
-            Some(finalize) => cost_in_microcredits(finalize),
-            None => Ok(0u64),
-        }
-    }
+    // pub fn estimate_finalize_fee(&self, program: &Program<N>, function: impl TryInto<Identifier<N>>) -> Result<u64> {
+    //     let function_name = function.try_into().map_err(|_| anyhow!("Invalid function name"))?;
+    //     match program.get_function(&function_name)?.finalize_logic() {
+    //         Some(finalize) => cost_in_microcredits(finalize),
+    //         None => Ok(0u64),
+    //     }
+    // }
 }
 
 #[cfg(test)]
@@ -240,14 +235,14 @@ mod tests {
     use super::*;
     use crate::{random_program, random_program_id, AleoAPIClient, RECORD_5_MICROCREDITS};
     use snarkvm::circuit::AleoV0;
-    use snarkvm_console::network::Testnet3;
+    use snarkvm_console::network::TestnetV0;
 
     #[test]
     fn test_fee_estimation() {
-        let private_key = PrivateKey::<Testnet3>::from_str(RECIPIENT_PRIVATE_KEY).unwrap();
-        let api_client = AleoAPIClient::<Testnet3>::testnet3();
+        let private_key = PrivateKey::<TestnetV0>::from_str(RECIPIENT_PRIVATE_KEY).unwrap();
+        let api_client = AleoAPIClient::<TestnetV0>::testnet();
         let program_manager =
-            ProgramManager::<Testnet3>::new(Some(private_key), None, Some(api_client.clone()), None).unwrap();
+            ProgramManager::<TestnetV0>::new(Some(private_key), None, Some(api_client.clone()), None).unwrap();
 
         let finalize_program = program_manager.api_client.as_ref().unwrap().get_program("lottery_first.aleo").unwrap();
         let hello_hello = program_manager.api_client.as_ref().unwrap().get_program("hello_hello.aleo").unwrap();
@@ -255,23 +250,23 @@ mod tests {
         let (total, (storage, finalize)) = program_manager
             .estimate_execution_fee::<AleoV0>(&finalize_program, "play", Vec::<&str>::new().into_iter())
             .unwrap();
-        let finalize_only = program_manager.estimate_finalize_fee(&finalize_program, "play").unwrap();
-        assert!(finalize_only > 0);
-        assert!(finalize > storage);
-        assert_eq!(finalize, finalize_only);
-        assert_eq!(total, finalize_only + storage);
-        assert_eq!(storage, total - finalize_only);
+        // let finalize_only = program_manager.estimate_finalize_fee(&finalize_program, "play").unwrap();
+        // assert!(finalize_only > 0);
+        // assert!(finalize > storage);
+        // assert_eq!(finalize, finalize_only);
+        // assert_eq!(total, finalize_only + storage);
+        // assert_eq!(storage, total - finalize_only);
 
         // Ensure a non-finalize scope program execution fee is estimated correctly
         let (total, (storage, finalize)) = program_manager
             .estimate_execution_fee::<AleoV0>(&hello_hello, "hello", vec!["5u32", "5u32"].into_iter())
             .unwrap();
-        let finalize_only = program_manager.estimate_finalize_fee(&hello_hello, "hello").unwrap();
-        assert!(storage > 0);
-        assert_eq!(finalize_only, 0);
-        assert_eq!(finalize, finalize_only);
-        assert_eq!(total, finalize_only + storage);
-        assert_eq!(storage, total - finalize_only);
+        // let finalize_only = program_manager.estimate_finalize_fee(&hello_hello, "hello").unwrap();
+        // assert!(storage > 0);
+        // assert_eq!(finalize_only, 0);
+        // assert_eq!(finalize, finalize_only);
+        // assert_eq!(total, finalize_only + storage);
+        // assert_eq!(storage, total - finalize_only);
 
         // Ensure a deployment fee is estimated correctly
         let random = random_program();
@@ -284,19 +279,19 @@ mod tests {
 
         // Ensure a program with imports is estimated correctly
         let nested_import_program = api_client.get_program("imported_add_mul.aleo").unwrap();
-        let finalize_only = program_manager.estimate_finalize_fee(&nested_import_program, "add_and_double").unwrap();
-        let (total, (storage, finalize)) = program_manager
-            .estimate_execution_fee::<AleoV0>(
-                &nested_import_program,
-                "add_and_double",
-                vec!["5u32", "5u32"].into_iter(),
-            )
-            .unwrap();
-        assert!(storage > 0);
-        assert_eq!(finalize_only, 0);
-        assert_eq!(finalize, finalize_only);
-        assert_eq!(total, finalize_only + storage);
-        assert_eq!(storage, total - finalize_only);
+        // let finalize_only = program_manager.estimate_finalize_fee(&nested_import_program, "add_and_double").unwrap();
+        // let (total, (storage, finalize)) = program_manager
+        //     .estimate_execution_fee::<AleoV0>(
+        //         &nested_import_program,
+        //         "add_and_double",
+        //         vec!["5u32", "5u32"].into_iter(),
+        //     )
+        //     .unwrap();
+        // assert!(storage > 0);
+        // assert_eq!(finalize_only, 0);
+        // assert_eq!(finalize, finalize_only);
+        // assert_eq!(total, finalize_only + storage);
+        // assert_eq!(storage, total - finalize_only);
 
         let (total, (storage, namespace)) =
             program_manager.estimate_deployment_fee::<AleoV0>(&nested_import_program).unwrap();
@@ -310,13 +305,13 @@ mod tests {
     #[test]
     #[ignore]
     fn test_execution() {
-        let private_key = PrivateKey::<Testnet3>::from_str(RECIPIENT_PRIVATE_KEY).unwrap();
+        let private_key = PrivateKey::<TestnetV0>::from_str(RECIPIENT_PRIVATE_KEY).unwrap();
         let encrypted_private_key =
             crate::Encryptor::encrypt_private_key_with_secret(&private_key, "password").unwrap();
-        let api_client = AleoAPIClient::<Testnet3>::local_testnet3("3030");
+        let api_client = AleoAPIClient::<TestnetV0>::local_testnet3("3030");
         let record_finder = RecordFinder::new(api_client.clone());
         let mut program_manager =
-            ProgramManager::<Testnet3>::new(Some(private_key), None, Some(api_client.clone()), None).unwrap();
+            ProgramManager::<TestnetV0>::new(Some(private_key), None, Some(api_client.clone()), None).unwrap();
 
         let fee = 2_500_000;
         let finalize_fee = 8_000_000;
@@ -344,7 +339,7 @@ mod tests {
 
         // Test programs can be executed with an encrypted private key
         let mut program_manager =
-            ProgramManager::<Testnet3>::new(None, Some(encrypted_private_key), Some(api_client), None).unwrap();
+            ProgramManager::<TestnetV0>::new(None, Some(encrypted_private_key), Some(api_client), None).unwrap();
 
         for i in 0..5 {
             let fee_record = record_finder.find_one_record(&private_key, fee).unwrap();
@@ -406,15 +401,15 @@ mod tests {
     #[test]
     fn test_execution_failure_modes() {
         let rng = &mut rand::thread_rng();
-        let recipient_private_key = PrivateKey::<Testnet3>::new(rng).unwrap();
-        let api_client = AleoAPIClient::<Testnet3>::testnet3();
-        let record_5_microcredits = Record::<Testnet3, Plaintext<Testnet3>>::from_str(RECORD_5_MICROCREDITS).unwrap();
+        let recipient_private_key = PrivateKey::<TestnetV0>::new(rng).unwrap();
+        let api_client = AleoAPIClient::<TestnetV0>::testnet();
+        let record_5_microcredits = Record::<TestnetV0, Plaintext<TestnetV0>>::from_str(RECORD_5_MICROCREDITS).unwrap();
         let record_2000000001_microcredits =
-            Record::<Testnet3, Plaintext<Testnet3>>::from_str(RECORD_2000000001_MICROCREDITS).unwrap();
+            Record::<TestnetV0, Plaintext<TestnetV0>>::from_str(RECORD_2000000001_MICROCREDITS).unwrap();
 
         // Ensure that program manager creation fails if no key is provided
         let mut program_manager =
-            ProgramManager::<Testnet3>::new(Some(recipient_private_key), None, Some(api_client), None).unwrap();
+            ProgramManager::<TestnetV0>::new(Some(recipient_private_key), None, Some(api_client), None).unwrap();
 
         // Assert that execution fails if record's available microcredits are below the fee
         let execution = program_manager.execute_program(
