@@ -15,6 +15,7 @@
 // along with the Aleo SDK library. If not, see <https://www.gnu.org/licenses/>.
 
 use super::*;
+use super::cost::deployment_cost;
 
 impl<N: Network> ProgramManager<N> {
     /// Deploy a program to the network
