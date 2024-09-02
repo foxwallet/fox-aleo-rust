@@ -195,7 +195,7 @@ pub mod snarkvm_types {
     pub use snarkvm_circuit_network::{Aleo, AleoV0, AleoTestnetV0};
     pub use snarkvm_console::{
         account::{Address, PrivateKey, Signature, ViewKey},
-        network::{TestnetV0, Environment},
+        network::{TestnetV0, MainnetV0,  Environment},
         prelude::{FromBytes, ToBytes, Uniform, FromFields, ToField},
         program::{
             Ciphertext,
