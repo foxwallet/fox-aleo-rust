@@ -27,37 +27,37 @@ default-features = false
 
 [workspace.dependencies.snarkvm]
 git = "https://github.com/AleoNet/snarkVM.git"
-rev = "d170a9f" # If this is updated, the rev in
+rev = "3d42aa0" # If this is updated, the rev in
 #version = "=1.0.0"
 
 [workspace.dependencies.snarkvm-circuit-network]
 git = "https://github.com/AleoNet/snarkVM.git"
-rev = "d170a9f" # If this is updated, the rev in
+rev = "3d42aa0" # If this is updated, the rev in
 #version = "=1.0.0"
 
 [workspace.dependencies.snarkvm-console]
 git = "https://github.com/AleoNet/snarkVM.git"
-rev = "d170a9f" # If this is updated, the rev in
+rev = "3d42aa0" # If this is updated, the rev in
 #version = "=0.16.19"
 
 [workspace.dependencies.snarkvm-console-network]
 git = "https://github.com/AleoNet/snarkVM.git"
-rev = "d170a9f" # If this is updated, the rev in
+rev = "3d42aa0" # If this is updated, the rev in
 #version = "=0.16.19"
 
 [workspace.dependencies.snarkvm-synthesizer]
 git = "https://github.com/AleoNet/snarkVM.git"
-rev = "d170a9f" # If this is updated, the rev in
+rev = "3d42aa0" # If this is updated, the rev in
 #version = "=0.16.19"
 
 [workspace.dependencies.snarkvm-ledger-block]
 git = "https://github.com/AleoNet/snarkVM.git"
-rev = "d170a9f" # If this is updated, the rev in
+rev = "3d42aa0" # If this is updated, the rev in
 #version = "=0.16.19"
 
 [workspace.dependencies.snarkvm-ledger-store]
 git = "https://github.com/AleoNet/snarkVM.git"
-rev = "d170a9f" # If this is updated, the rev in
+rev = "3d42aa0" # If this is updated, the rev in
 #version = "=0.16.19"
 
 [workspace.dependencies.snarkvm-ledger-query]
@@ -67,7 +67,7 @@ rev = "d170a9f" # If this is updated, the rev in
 
 [workspace.dependencies.snarkvm-wasm]
 git = "https://github.com/AleoNet/snarkVM.git"
-rev = "d170a9f" # If this is updated, the rev in
+rev = "3d42aa0" # If this is updated, the rev in
 #version = "=0.16.19"
 
 [lib]

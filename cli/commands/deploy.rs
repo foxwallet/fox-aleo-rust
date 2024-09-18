@@ -89,15 +89,15 @@ impl Deploy {
             0u64
         };
 
-        // Setup the API client to use configured peer or default to https://api.explorer.aleo.org/v1/testnet3
+        // Setup the API client to use configured peer or default to https://api.explorer.aleo.org/v1/mainnet
         let api_client = self
             .endpoint
             .map_or_else(
                 || {
                     println!("Using default peer: https://api.explorer.aleo.org/v1/testnet3");
-                    Ok(AleoAPIClient::<CurrentNetwork>::testnet())
+                    Ok(AleoAPIClient::<CurrentNetwork>::mainnet())
                 },
-                |peer| AleoAPIClient::<CurrentNetwork>::new(&peer, "testnet3"),
+                |peer| AleoAPIClient::<CurrentNetwork>::new(&peer, "mainnet"),
             )
             .map_err(|e| anyhow!("{:?}", e))?;
 

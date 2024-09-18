@@ -45,12 +45,12 @@ impl<N: Network> AleoAPIClient<N> {
         })
     }
 
-    pub fn testnet() -> Self {
-        Self::new("https://api.explorer.aleo.org/v1", "testnet").unwrap()
+    pub fn mainnet() -> Self {
+        Self::new("https://api.explorer.aleo.org/v1", "mainnet").unwrap()
     }
 
-    pub fn local_testnet(port: &str) -> Self {
-        Self::new(&format!("http://0.0.0.0:{}", port), "testnet").unwrap()
+    pub fn local_mainnet(port: &str) -> Self {
+        Self::new(&format!("http://0.0.0.0:{}", port), "mainnet").unwrap()
     }
 
     /// Get base URL
