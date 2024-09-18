@@ -23,6 +23,8 @@ pub mod state;
 pub use state::*;
 
 pub mod records;
+pub mod cost;
+
 pub use records::*;
 
 /// Transfer Type to Perform

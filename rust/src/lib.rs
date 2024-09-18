@@ -43,12 +43,12 @@
 //!   use aleo_rust::AleoAPIClient;
 //!   use snarkvm_console::{
 //!       account::PrivateKey,
-//!       network::Testnet3,
+//!       network::MainnetV0,
 //!   };
 //!   use rand::thread_rng;
 //!
-//!   // Create a client that interacts with the testnet3 program
-//!   let api_client = AleoAPIClient::<Testnet3>::testnet3();
+//!   // Create a client that interacts with the mainnet program
+//!   let api_client = AleoAPIClient::<MainnetV0>::mainnet();
 //!
 //!   // FIND A PROGRAM ON THE ALEO NETWORK
 //!   let hello = api_client.get_program("hello.aleo").unwrap();
@@ -81,30 +81,31 @@
 //! ```no_run
 //!   use aleo_rust::{
 //!     AleoAPIClient, Encryptor, ProgramManager, RecordFinder,
-//!     snarkvm_types::{Address, PrivateKey, Testnet3, Program},
+//!     snarkvm_types::{Address, PrivateKey, MainnetV0, Program},
 //!     TransferType
 //!   };
 //!   use rand::thread_rng;
 //!   use std::str::FromStr;
+//! use snarkvm::ledger::authority::test_helpers::CurrentNetwork;
 //!
 //!   // Create the necessary components to create the program manager
 //!   let mut rng = thread_rng();
 //!   // Create an api client to query the network state
-//!   let api_client = AleoAPIClient::<Testnet3>::testnet3();
+//!   let api_client = AleoAPIClient::<MainnetV0>::mainnet();
 //!   // Create a private key (in practice, this would be a user's private key)
-//!   let private_key = PrivateKey::<Testnet3>::new(&mut rng).unwrap();
+//!   let private_key = PrivateKey::<MainnetV0>::new(&mut rng).unwrap();
 //!   // Encrypt the private key with a password
-//!   let private_key_ciphertext = Encryptor::<Testnet3>::encrypt_private_key_with_secret(&private_key, "password").unwrap();
+//!   let private_key_ciphertext = Encryptor::<MainnetV0>::encrypt_private_key_with_secret(&private_key, "password").unwrap();
 //!
 //!   // Create the program manager
 //!   // (Note: An optional local directory can be provided to manage local program data)
-//!   let mut program_manager = ProgramManager::<Testnet3>::new(None, Some(private_key_ciphertext), Some(api_client), None, false).unwrap();
+//!   let mut program_manager = ProgramManager::<MainnetV0>::new(None, Some(private_key_ciphertext), Some(api_client), None, false).unwrap();
 //!
 //!   // ------------------
 //!   // EXECUTE PROGRAM STEPS
 //!   // ------------------
 //!
-//!   let record_finder = RecordFinder::<Testnet3>::new(AleoAPIClient::testnet3());
+//!   let record_finder = RecordFinder::<MainnetV0>::new(AleoAPIClient::mainnet());
 //!   // Set the fee for the deployment transaction (in units of microcredits)
 //!   let fee_microcredits = 300000;
 //!   // Find a record to fund the deployment fee (requires an account with a balance)
@@ -131,7 +132,7 @@
 //!   // the program on disk when the program manager is created)
 //!   program_manager.add_program(&program).unwrap();
 //!   // Create a record finder to find records to fund the deployment fee
-//!   let record_finder = RecordFinder::<Testnet3>::new(AleoAPIClient::testnet3());
+//!   let record_finder = RecordFinder::<MainnetV0>::new(AleoAPIClient::mainnet());
 //!   // Set the fee for the deployment transaction (in units of microcredits)
 //!   let fee_microcredits = 300000;
 //!   // Find a record to fund the deployment fee (requires an account with a balance)
@@ -140,7 +141,7 @@
 //!   program_manager.deploy_program(program_name, fee_microcredits, Some(fee_record), Some("password")).unwrap();
 //!
 //!   // Wait several minutes.. then check the program exists on the network
-//!   let api_client = AleoAPIClient::<Testnet3>::testnet3();
+//!   let api_client = AleoAPIClient::<MainnetV0>::mainnet();
 //!   let program_on_chain = api_client.get_program(program_name).unwrap();
 //!   let program_on_chain_name = program_on_chain.id().to_string();
 //!   assert_eq!(&program_on_chain_name, program_name);
@@ -150,7 +151,7 @@
 //!   // ------------------
 //!
 //!   // Create a recipient (in practice, the recipient would send their address to the sender)
-//!   let recipient_key = PrivateKey::<Testnet3>::new(&mut rng).unwrap();
+//!   let recipient_key = PrivateKey::<MainnetV0>::new(&mut rng).unwrap();
 //!   let recipient_address = Address::try_from(recipient_key).unwrap();
 //!   // Create amount and fee (both in units of microcredits)
 //!   let amount = 30000;
@@ -195,7 +196,7 @@ pub mod snarkvm_types {
     pub use snarkvm_circuit_network::{Aleo, AleoV0};
     pub use snarkvm_console::{
         account::{Address, PrivateKey, Signature, ViewKey},
-        network::Testnet3,
+        network::MainnetV0,
         prelude::{ToBytes, Uniform},
         program::{
             Ciphertext,
@@ -225,9 +226,9 @@ pub mod snarkvm_types {
         ConsensusStore,
     };
     pub use snarkvm_synthesizer::{
-        cost_in_microcredits,
-        deployment_cost,
-        execution_cost,
+        // cost_in_microcredits,
+        // deployment_cost,
+        // execution_cost,
         snark::{Proof, ProvingKey, VerifyingKey},
         Process,
         Program,

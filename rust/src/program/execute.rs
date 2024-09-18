@@ -15,6 +15,7 @@
 // along with the Aleo SDK library. If not, see <https://www.gnu.org/licenses/>.
 
 use super::*;
+use super::helpers::cost::{execution_cost, cost_in_microcredits};
 
 impl<N: Network> ProgramManager<N> {
     /// Create an offline execution of a program to share with a third party.
