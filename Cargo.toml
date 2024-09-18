@@ -62,7 +62,7 @@ rev = "3d42aa0" # If this is updated, the rev in
 
 [workspace.dependencies.snarkvm-ledger-query]
 git = "https://github.com/AleoNet/snarkVM.git"
-rev = "d170a9f" # If this is updated, the rev in
+rev = "3d42aa0" # If this is updated, the rev in
 #version = "=0.16.19"
 
 [workspace.dependencies.snarkvm-wasm]
