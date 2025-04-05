@@ -427,7 +427,7 @@ mod tests {
 
     #[test]
     fn test_api_get_blocks() {
-        let client = AleoAPIClient::<MainnetV0>::testnet3();
+        let client = AleoAPIClient::<MainnetV0>::testnet();
         let blocks = client.get_blocks(0, 3).unwrap();
 
         // Check height matches
@@ -442,7 +442,7 @@ mod tests {
 
     #[test]
     fn test_mappings_query() {
-        let client = AleoAPIClient::<MainnetV0>::testnet3();
+        let client = AleoAPIClient::<MainnetV0>::testnet();
         let mappings = client.get_program_mappings("credits.aleo").unwrap();
         // Assert there's only one mapping in credits.aleo
         assert_eq!(mappings.len(), 4);
@@ -454,7 +454,7 @@ mod tests {
 
     #[test]
     fn test_import_resolution() {
-        let client = AleoAPIClient::<MainnetV0>::testnet3();
+        let client = AleoAPIClient::<MainnetV0>::testnet();
         let imports = client.get_program_imports("imported_add_mul.aleo").unwrap();
         let id1 = ProgramID::<MainnetV0>::from_str("multiply_test.aleo").unwrap();
         let id2 = ProgramID::<MainnetV0>::from_str("double_test.aleo").unwrap();

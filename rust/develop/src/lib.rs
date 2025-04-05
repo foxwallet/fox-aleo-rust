@@ -47,7 +47,7 @@
 //!
 //! Once installed the following command can be used to start the server:
 //!
-//! `aleo-develop start` - Start the server at `0.0.0.0:4040` (by default the server sends transactions to the Aleo testnet3 network)
+//! `aleo-develop start` - Start the server at `0.0.0.0:4040` (by default the server sends transactions to the Aleo testnet network)
 //!
 //! `aleo-develop start --help` - Show all available options for configuring the server
 //!
@@ -195,7 +195,7 @@ impl<N: Network> Rest<N> {
         let peer = peer_url.unwrap_or("https://api.explorer.aleo.org/v1".to_string());
 
         // Initialize an API client configured for the specified network.
-        let api_client = AleoAPIClient::new(&peer, "testnet3")?;
+        let api_client = AleoAPIClient::new(&peer, "testnet")?;
         let record_finder = RecordFinder::new(api_client.clone());
 
         let key_warning = if private_key_ciphertext.is_some() {

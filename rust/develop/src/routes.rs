@@ -21,7 +21,7 @@ impl<N: Network> Rest<N> {
     pub fn routes(&self) -> impl Filter<Extract = (impl Reply,), Error = Rejection> + Clone {
         // POST /deploy
         let deploy = warp::post()
-            .and(warp::path!("testnet3" / "deploy"))
+            .and(warp::path!("mainnet" / "deploy"))
             .and(warp::body::content_length_limit(16 * 1024 * 1024))
             .and(warp::body::json())
             .and(with(self.record_finder.clone()))
@@ -31,7 +31,7 @@ impl<N: Network> Rest<N> {
 
         // POST /execute
         let execute = warp::post()
-            .and(warp::path!("testnet3" / "execute"))
+            .and(warp::path!("mainnet" / "execute"))
             .and(warp::body::content_length_limit(16 * 1024 * 1024))
             .and(warp::body::json())
             .and(with(self.record_finder.clone()))
@@ -41,7 +41,7 @@ impl<N: Network> Rest<N> {
 
         // POST /transfer
         let transfer = warp::post()
-            .and(warp::path!("testnet3" / "transfer"))
+            .and(warp::path!("mainnet" / "transfer"))
             .and(warp::body::content_length_limit(16 * 1024 * 1024))
             .and(warp::body::json())
             .and(with(self.record_finder.clone()))
@@ -82,7 +82,7 @@ impl<N: Network> Rest<N> {
     // If a separate peer url is provided in the request, use that instead of the one in the config
     fn get_api_client(api_client: AleoAPIClient<N>, peer_url: &Option<String>) -> Result<AleoAPIClient<N>, Rejection> {
         if let Some(peer_url) = peer_url {
-            AleoAPIClient::new(peer_url, "testnet3").or_reject()
+            AleoAPIClient::new(peer_url, "mainnet").or_reject()
         } else {
             Ok(api_client)
         }
@@ -104,19 +104,19 @@ impl<N: Network> Rest<N> {
         // Get API client and private key and create a program manager
         let api_client = Self::get_api_client(api_client, &request.peer_url)?;
         let private_key = Self::get_private_key(private_key_ciphertext, request.private_key, request.password.clone())?;
-        let mut program_manager = ProgramManager::new(Some(private_key), None, Some(api_client), None).or_reject()?;
+        let mut program_manager = ProgramManager::new(Some(private_key), None, Some(api_client), None, false).or_reject()?;
         program_manager.add_program(&request.program).or_reject()?;
 
         // Get the fee record if it is not provided in the request
         let fee_record = if request.fee_record.is_none() {
-            spawn_blocking!(record_finder.find_one_record(&private_key, request.fee))?
+            spawn_blocking!(record_finder.find_one_record(&private_key, request.fee, None))?
         } else {
             request.fee_record.unwrap()
         };
 
         // Deploy the program and return the resulting transaction id
         let transaction_id =
-            spawn_blocking!(program_manager.deploy_program(request.program.id(), request.fee, fee_record, None))?;
+            spawn_blocking!(program_manager.deploy_program(request.program.id(), request.fee, Some(fee_record), None))?;
 
         Ok(reply::json(&transaction_id))
     }
@@ -136,11 +136,11 @@ impl<N: Network> Rest<N> {
         // Get API client and private key and create a program manager
         let api_client = Self::get_api_client(api_client, &request.peer_url)?;
         let private_key = Self::get_private_key(private_key_ciphertext, request.private_key, request.password.clone())?;
-        let mut program_manager = ProgramManager::new(Some(private_key), None, Some(api_client), None).or_reject()?;
+        let mut program_manager = ProgramManager::new(Some(private_key), None, Some(api_client), None, false).or_reject()?;
 
         // Find a fee record if a fee is specified and a fee record is not provided
         let fee_record = if request.fee_record.is_none() {
-            spawn_blocking!(record_finder.find_one_record(&private_key, request.fee))?
+            spawn_blocking!(record_finder.find_one_record(&private_key, request.fee, None))?
         } else {
             request.fee_record.take().unwrap()
         };
@@ -151,7 +151,7 @@ impl<N: Network> Rest<N> {
             request.program_function,
             request.inputs.iter(),
             request.fee,
-            fee_record,
+            Some(fee_record),
             None,
             None,
         ))?;
@@ -174,7 +174,7 @@ impl<N: Network> Rest<N> {
         }
         let api_client = Self::get_api_client(api_client, &request.peer_url)?;
         let private_key = Self::get_private_key(private_key_ciphertext, request.private_key, request.password.clone())?;
-        let program_manager = ProgramManager::new(Some(private_key), None, Some(api_client), None).or_reject()?;
+        let program_manager = ProgramManager::new(Some(private_key), None, Some(api_client), None, false).or_reject()?;
 
         let specified_transfer_type = request.transfer_type.as_str();
         info!("Transfer type specified: {specified_transfer_type}");
@@ -192,14 +192,14 @@ impl<N: Network> Rest<N> {
                     if let Some(fee_record) = request.fee_record {
                         (None, fee_record)
                     } else {
-                        (None, spawn_blocking!(record_finder.find_one_record(&private_key, request.fee))?)
+                        (None, spawn_blocking!(record_finder.find_one_record(&private_key, request.fee, None))?)
                     }
                 }
                 TransferType::PublicToPrivate => {
                     if let Some(fee_record) = request.fee_record {
                         (None, fee_record)
                     } else {
-                        (None, spawn_blocking!(record_finder.find_one_record(&private_key, request.fee))?)
+                        (None, spawn_blocking!(record_finder.find_one_record(&private_key, request.fee, None))?)
                     }
                 }
                 _ => {
@@ -209,11 +209,11 @@ impl<N: Network> Rest<N> {
                             // Find a fee record if a fee is specified and a fee record is not provided
                             (
                                 Some(amount_record),
-                                spawn_blocking!(record_finder.find_one_record(&private_key, request.fee))?,
+                                spawn_blocking!(record_finder.find_one_record(&private_key, request.fee, None))?,
                             )
                         }
                         (None, Some(fee_record)) => (
-                            Some(spawn_blocking!(record_finder.find_one_record(&private_key, request.amount))?),
+                            Some(spawn_blocking!(record_finder.find_one_record(&private_key, request.amount, None))?),
                             fee_record,
                         ),
                         (None, None) => {
@@ -234,7 +234,7 @@ impl<N: Network> Rest<N> {
             transfer_type,
             None,
             amount_record,
-            fee_record
+            Some(fee_record)
         ))?;
         Ok(reply::json(&transaction_id))
     }

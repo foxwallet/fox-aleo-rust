@@ -207,7 +207,7 @@ pub fn transfer_to_test_account(
     recipient_private_key: PrivateKey<MainnetV0>,
     port: &str,
 ) -> Result<Vec<Record<MainnetV0, Plaintext<MainnetV0>>>> {
-    let api_client = AleoAPIClient::<MainnetV0>::local_testnet3(port);
+    let api_client = AleoAPIClient::<MainnetV0>::local_testnet(port);
     let beacon_private_key = PrivateKey::<MainnetV0>::from_str(BEACON_PRIVATE_KEY)?;
 
     let recipient_view_key = ViewKey::<MainnetV0>::try_from(&recipient_private_key)?;

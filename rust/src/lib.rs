@@ -48,7 +48,7 @@
 //!   use rand::thread_rng;
 //!
 //!   // Create a client that interacts with the testnet3 program
-//!   let api_client = AleoAPIClient::<MainnetV0>::testnet3();
+//!   let api_client = AleoAPIClient::<MainnetV0>::testnet();
 //!
 //!   // FIND A PROGRAM ON THE ALEO NETWORK
 //!   let hello = api_client.get_program("hello.aleo").unwrap();
@@ -90,7 +90,7 @@
 //!   // Create the necessary components to create the program manager
 //!   let mut rng = thread_rng();
 //!   // Create an api client to query the network state
-//!   let api_client = AleoAPIClient::<MainnetV0>::testnet3();
+//!   let api_client = AleoAPIClient::<MainnetV0>::testnet();
 //!   // Create a private key (in practice, this would be a user's private key)
 //!   let private_key = PrivateKey::<MainnetV0>::new(&mut rng).unwrap();
 //!   // Encrypt the private key with a password
@@ -104,7 +104,7 @@
 //!   // EXECUTE PROGRAM STEPS
 //!   // ------------------
 //!
-//!   let record_finder = RecordFinder::<MainnetV0>::new(AleoAPIClient::testnet3());
+//!   let record_finder = RecordFinder::<MainnetV0>::new(AleoAPIClient::testnet());
 //!   // Set the fee for the deployment transaction (in units of microcredits)
 //!   let fee_microcredits = 300000;
 //!   // Find a record to fund the deployment fee (requires an account with a balance)
@@ -131,7 +131,7 @@
 //!   // the program on disk when the program manager is created)
 //!   program_manager.add_program(&program).unwrap();
 //!   // Create a record finder to find records to fund the deployment fee
-//!   let record_finder = RecordFinder::<MainnetV0>::new(AleoAPIClient::testnet3());
+//!   let record_finder = RecordFinder::<MainnetV0>::new(AleoAPIClient::testnet());
 //!   // Set the fee for the deployment transaction (in units of microcredits)
 //!   let fee_microcredits = 300000;
 //!   // Find a record to fund the deployment fee (requires an account with a balance)
@@ -140,7 +140,7 @@
 //!   program_manager.deploy_program(program_name, fee_microcredits, Some(fee_record), Some("password")).unwrap();
 //!
 //!   // Wait several minutes.. then check the program exists on the network
-//!   let api_client = AleoAPIClient::<MainnetV0>::testnet3();
+//!   let api_client = AleoAPIClient::<MainnetV0>::testnet();
 //!   let program_on_chain = api_client.get_program(program_name).unwrap();
 //!   let program_on_chain_name = program_on_chain.id().to_string();
 //!   assert_eq!(&program_on_chain_name, program_name);
@@ -192,11 +192,11 @@ pub mod snarkvm_types {
     //! Re-export of crucial types from the snarkVM crate
     #[cfg(feature = "full")]
     pub use snarkvm::{file::Manifest, package::Package};
-    pub use snarkvm_circuit_network::{Aleo, AleoV0};
+    pub use snarkvm_circuit_network::{Aleo, AleoV0, AleoTestnetV0};
     pub use snarkvm_console::{
         account::{Address, PrivateKey, Signature, ViewKey},
-        network::MainnetV0,
-        prelude::{ToBytes, Uniform},
+        network::{TestnetV0, MainnetV0,  Environment},
+        prelude::{FromBytes, ToBytes, Uniform, FromFields, ToField},
         program::{
             Ciphertext,
             Entry,
@@ -211,12 +211,15 @@ pub mod snarkvm_types {
             ProgramID,
             ProgramOwner,
             Record,
+            RecordType,
             Response,
             Value,
             ValueType,
+            StructType,
         },
-        types::Field,
+        types::{Field},
     };
+    pub use snarkvm_fields::{PrimeField};
     pub use snarkvm_ledger_block::{Block, Deployment, Execution, Transaction};
     pub use snarkvm_ledger_query::Query;
     pub use snarkvm_ledger_store::{
@@ -225,9 +228,7 @@ pub mod snarkvm_types {
         ConsensusStore,
     };
     pub use snarkvm_synthesizer::{
-        cost_in_microcredits,
-        deployment_cost,
-        execution_cost,
+        prelude::{deployment_cost, execution_cost_v1, execution_cost_v2, cost_in_microcredits_v1, cost_in_microcredits_v2},
         snark::{Proof, ProvingKey, VerifyingKey},
         Process,
         Program,
@@ -235,13 +236,16 @@ pub mod snarkvm_types {
         Trace,
         VM,
     };
+    pub use snarkvm_utilities::bits::ToBits;
 }
+pub use snarkvm_algorithms::snark::varuna::VarunaVersion;
 
 pub use snarkvm_types::*;
 
 use anyhow::{anyhow, bail, ensure, Error, Result};
-use indexmap::IndexMap;
+pub use indexmap::{IndexMap, IndexSet};
 use once_cell::sync::OnceCell;
+pub use snarkvm_console::program::Entry;
 #[cfg(feature = "full")]
 use std::{convert::TryInto, fs::File, io::Read, ops::Range, path::PathBuf};
 use std::{iter::FromIterator, marker::PhantomData, ops::Deref, str::FromStr};

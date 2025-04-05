@@ -200,6 +200,7 @@ mod tests {
         RecordFinder,
     };
     use snarkvm_console::network::MainnetV0;
+    use snarkvm_console::network::TestnetV0;
 
     use std::{ops::Add, str::FromStr, thread};
 
@@ -214,7 +215,7 @@ mod tests {
         // Wait for the node to bootup
         thread::sleep(std::time::Duration::from_secs(5));
         transfer_to_test_account(2000000001, 14, recipient_private_key, "3033").unwrap();
-        let api_client = AleoAPIClient::<MainnetV0>::local_testnet3("3033");
+        let api_client = AleoAPIClient::<MainnetV0>::local_testnet("3033");
         let record_finder = RecordFinder::<MainnetV0>::new(api_client.clone());
         let temp_dir = setup_directory("aleo_test_deploy", CREDITS_IMPORT_TEST_PROGRAM, vec![]).unwrap();
 
@@ -307,7 +308,7 @@ mod tests {
         let record_5_microcredits = Record::<MainnetV0, Plaintext<MainnetV0>>::from_str(RECORD_5_MICROCREDITS).unwrap();
         let record_2000000001_microcredits =
             Record::<MainnetV0, Plaintext<MainnetV0>>::from_str(RECORD_2000000001_MICROCREDITS).unwrap();
-        let api_client = AleoAPIClient::<MainnetV0>::local_testnet3("3033");
+        let api_client = AleoAPIClient::<MainnetV0>::local_testnet("3033");
         let randomized_program = random_program();
         let randomized_program_id = randomized_program.id().to_string();
         let randomized_program_string = randomized_program.to_string();

@@ -36,6 +36,12 @@ pub use resolver::*;
 pub mod transfer;
 pub use transfer::*;
 
+pub mod split;
+pub use split::*;
+
+pub mod join;
+pub use join::*;
+
 /// Program management object for loading programs for building, execution, and deployment
 ///
 /// This object is meant to be a software abstraction that can be consumed by software like
@@ -156,7 +162,7 @@ impl<N: Network> ProgramManager<N> {
         };
         bail!("Private key configuration error")
     }
-    
+
     pub fn vm(&self) -> &Option<VM<N, ConsensusMemory<N>>> {
         &self.vm
     }
@@ -174,8 +180,10 @@ mod tests {
 
     #[test]
     fn test_constructors_fail_with_multiple_keys_or_no_keys() {
-        let api_client = AleoAPIClient::<MainnetV0>::testnet3();
+        let api_client = AleoAPIClient::<MainnetV0>::testnet();
         let private_key = PrivateKey::<MainnetV0>::from_str(RECIPIENT_PRIVATE_KEY).unwrap();
+        let api_client = AleoAPIClient::<TestnetV0>::testnet();
+        let private_key = PrivateKey::<TestnetV0>::from_str(RECIPIENT_PRIVATE_KEY).unwrap();
         let private_key_ciphertext =
             Encryptor::<MainnetV0>::encrypt_private_key_with_secret(&private_key, "password").unwrap();
         // Create a temp dir without proper programs to test that the hybrid client works even if the local resource directory doesn't exist
@@ -250,7 +258,7 @@ mod tests {
         let private_key_ciphertext =
             Encryptor::<MainnetV0>::encrypt_private_key_with_secret(&private_key, "password").unwrap();
         let temp_dir = std::env::temp_dir();
-        let api_client = AleoAPIClient::<MainnetV0>::testnet3();
+        let api_client = AleoAPIClient::<MainnetV0>::testnet();
 
         let program_manager = ProgramManager::<MainnetV0>::new(
             None,
@@ -278,7 +286,7 @@ mod tests {
     fn test_private_key_retrieval_from_plaintext() {
         let private_key = PrivateKey::<MainnetV0>::from_str(RECIPIENT_PRIVATE_KEY).unwrap();
         let temp_dir = std::env::temp_dir();
-        let api_client = AleoAPIClient::<MainnetV0>::testnet3();
+        let api_client = AleoAPIClient::<MainnetV0>::testnet();
 
         let program_manager =
             ProgramManager::<MainnetV0>::new(Some(private_key), None, Some(api_client), Some(temp_dir), false).unwrap();
@@ -293,7 +301,7 @@ mod tests {
 
     #[test]
     fn test_import_resolution() {
-        let api_client = AleoAPIClient::<MainnetV0>::testnet3();
+        let api_client = AleoAPIClient::<MainnetV0>::testnet();
         let top_level_program = api_client.get_program("imported_add_mul.aleo").unwrap();
         let add_program = api_client.get_program("addition_test.aleo").unwrap();
         let multiply_program = api_client.get_program("multiply_test.aleo").unwrap();

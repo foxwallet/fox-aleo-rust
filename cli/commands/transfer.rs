@@ -97,18 +97,18 @@ impl Transfer {
             .bright_blue()
         );
 
-        // Setup the API client to use configured peer or default to https://api.explorer.aleo.org/v1/testnet3
+        // Setup the API client to use configured peer or default to https://api.explorer.aleo.org/v1/testnet
         let api_client = self
             .endpoint
             .map_or_else(
                 || {
                     println!(
                         "Using default peer: {}",
-                        "https://api.explorer.aleo.org/v1/testnet3".bright_blue().bold()
+                        "https://api.explorer.aleo.org/v1/testnet".bright_blue().bold()
                     );
-                    Ok(AleoAPIClient::<CurrentNetwork>::testnet3())
+                    Ok(AleoAPIClient::<CurrentNetwork>::testnet())
                 },
-                |peer| AleoAPIClient::<CurrentNetwork>::new(&peer, "testnet3"),
+                |peer| AleoAPIClient::<CurrentNetwork>::new(&peer, "testnet"),
             )
             .map_err(|e| anyhow!("{:?}", e))?;
 
