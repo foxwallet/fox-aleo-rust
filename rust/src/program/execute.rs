@@ -275,7 +275,7 @@ mod tests {
     #[test]
     fn test_fee_estimation() {
         let private_key = PrivateKey::<MainnetV0>::from_str(RECIPIENT_PRIVATE_KEY).unwrap();
-        let api_client = AleoAPIClient::<MainnetV0>::testnet();
+        let api_client = AleoAPIClient::<MainnetV0>::mainnet();
         let program_manager =
             ProgramManager::<MainnetV0>::new(Some(private_key), None, Some(api_client.clone()), None, false).unwrap();
 
@@ -445,7 +445,7 @@ mod tests {
     fn test_execution_failure_modes() {
         let rng = &mut rand::thread_rng();
         let recipient_private_key = PrivateKey::<MainnetV0>::new(rng).unwrap();
-        let api_client = AleoAPIClient::<MainnetV0>::testnet();
+        let api_client = AleoAPIClient::<MainnetV0>::mainnet();
         let record_5_microcredits = Record::<MainnetV0, Plaintext<MainnetV0>>::from_str(RECORD_5_MICROCREDITS).unwrap();
         let record_2000000001_microcredits =
             Record::<MainnetV0, Plaintext<MainnetV0>>::from_str(RECORD_2000000001_MICROCREDITS).unwrap();

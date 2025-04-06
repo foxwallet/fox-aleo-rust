@@ -104,11 +104,11 @@ impl Transfer {
                 || {
                     println!(
                         "Using default peer: {}",
-                        "https://api.explorer.aleo.org/v1/testnet".bright_blue().bold()
+                        "https://api.explorer.aleo.org/v1/mainnet".bright_blue().bold()
                     );
-                    Ok(AleoAPIClient::<CurrentNetwork>::testnet())
+                    Ok(AleoAPIClient::<CurrentNetwork>::mainnet())
                 },
-                |peer| AleoAPIClient::<CurrentNetwork>::new(&peer, "testnet"),
+                |peer| AleoAPIClient::<CurrentNetwork>::new(&peer, "mainnet"),
             )
             .map_err(|e| anyhow!("{:?}", e))?;
 

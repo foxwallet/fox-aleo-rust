@@ -48,7 +48,7 @@
 //!   use rand::thread_rng;
 //!
 //!   // Create a client that interacts with the testnet3 program
-//!   let api_client = AleoAPIClient::<MainnetV0>::testnet();
+//!   let api_client = AleoAPIClient::<MainnetV0>::mainnet();
 //!
 //!   // FIND A PROGRAM ON THE ALEO NETWORK
 //!   let hello = api_client.get_program("hello.aleo").unwrap();
@@ -90,7 +90,7 @@
 //!   // Create the necessary components to create the program manager
 //!   let mut rng = thread_rng();
 //!   // Create an api client to query the network state
-//!   let api_client = AleoAPIClient::<MainnetV0>::testnet();
+//!   let api_client = AleoAPIClient::<MainnetV0>::mainnet();
 //!   // Create a private key (in practice, this would be a user's private key)
 //!   let private_key = PrivateKey::<MainnetV0>::new(&mut rng).unwrap();
 //!   // Encrypt the private key with a password
@@ -104,7 +104,7 @@
 //!   // EXECUTE PROGRAM STEPS
 //!   // ------------------
 //!
-//!   let record_finder = RecordFinder::<MainnetV0>::new(AleoAPIClient::testnet());
+//!   let record_finder = RecordFinder::<MainnetV0>::new(AleoAPIClient::mainnet());
 //!   // Set the fee for the deployment transaction (in units of microcredits)
 //!   let fee_microcredits = 300000;
 //!   // Find a record to fund the deployment fee (requires an account with a balance)
@@ -131,7 +131,7 @@
 //!   // the program on disk when the program manager is created)
 //!   program_manager.add_program(&program).unwrap();
 //!   // Create a record finder to find records to fund the deployment fee
-//!   let record_finder = RecordFinder::<MainnetV0>::new(AleoAPIClient::testnet());
+//!   let record_finder = RecordFinder::<MainnetV0>::new(AleoAPIClient::mainnet());
 //!   // Set the fee for the deployment transaction (in units of microcredits)
 //!   let fee_microcredits = 300000;
 //!   // Find a record to fund the deployment fee (requires an account with a balance)
@@ -140,7 +140,7 @@
 //!   program_manager.deploy_program(program_name, fee_microcredits, Some(fee_record), Some("password")).unwrap();
 //!
 //!   // Wait several minutes.. then check the program exists on the network
-//!   let api_client = AleoAPIClient::<MainnetV0>::testnet();
+//!   let api_client = AleoAPIClient::<MainnetV0>::mainnet();
 //!   let program_on_chain = api_client.get_program(program_name).unwrap();
 //!   let program_on_chain_name = program_on_chain.id().to_string();
 //!   assert_eq!(&program_on_chain_name, program_name);

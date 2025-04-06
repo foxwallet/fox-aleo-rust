@@ -195,7 +195,7 @@ impl<N: Network> Rest<N> {
         let peer = peer_url.unwrap_or("https://api.explorer.aleo.org/v1".to_string());
 
         // Initialize an API client configured for the specified network.
-        let api_client = AleoAPIClient::new(&peer, "testnet")?;
+        let api_client = AleoAPIClient::new(&peer, "mainnet")?;
         let record_finder = RecordFinder::new(api_client.clone());
 
         let key_warning = if private_key_ciphertext.is_some() {
