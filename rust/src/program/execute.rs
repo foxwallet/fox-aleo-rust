@@ -70,7 +70,7 @@ impl<N: Network> ProgramManager<N> {
         let locator = Locator::new(*program_id, function_name);
         let (response, mut trace) = vm.process().write().execute::<A, _>(authorization, rng)?;
         trace.prepare(query)?;
-        let execution = trace.prove_execution::<A, _>(&locator.to_string(), VarunaVersion::V1, &mut rand::thread_rng())?;
+        let execution = trace.prove_execution::<A, _>(&locator.to_string(), VarunaVersion::V2, &mut rand::thread_rng())?;
 
         // Get the public outputs
         let mut public_outputs = vec![];
@@ -237,8 +237,8 @@ impl<N: Network> ProgramManager<N> {
         let locator = Locator::new(*program_id, function_name);
         let (_, mut trace) = vm.process().write().execute::<A, _>(authorization, rng)?;
         trace.prepare(query)?;
-        let execution = trace.prove_execution::<A, _>(&locator.to_string(), VarunaVersion::V1, &mut rand::thread_rng())?;
-        execution_cost_v1(&vm.process().write(), &execution)
+        let execution = trace.prove_execution::<A, _>(&locator.to_string(), VarunaVersion::V2, &mut rand::thread_rng())?;
+        execution_cost_v2(&vm.process().write(), &execution)
     }
 
     /// Estimate the finalize fee component for executing a function. This fee is additional to the
@@ -260,7 +260,7 @@ impl<N: Network> ProgramManager<N> {
         // };
         // Compute finalize cost.
         let stack = Stack::new(&process, &program)?;
-        cost_in_microcredits_v1(&stack, &function_name)
+        cost_in_microcredits_v2(&stack, &function_name)
     }
 }
 

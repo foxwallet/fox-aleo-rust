@@ -74,6 +74,6 @@ impl<N: Network> OfflineExecution<N> {
         verifier_inputs: Vec<(VerifyingKey<N>, Vec<Vec<N::Field>>)>,
         execution: &Execution<N>,
     ) -> Result<(), String> {
-        Trace::verify_execution_proof(locator, VarunaVersion::V1, verifier_inputs, execution).map_err(|e| e.to_string())
+        Trace::verify_execution_proof(locator, VarunaVersion::V2, verifier_inputs, execution).map_err(|e| e.to_string())
     }
 }
