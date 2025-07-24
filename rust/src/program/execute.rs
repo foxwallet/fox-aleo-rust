@@ -15,6 +15,7 @@
 // along with the Aleo SDK library. If not, see <https://www.gnu.org/licenses/>.
 
 use super::*;
+use aleo_std::StorageMode;
 
 impl<N: Network> ProgramManager<N> {
     /// Create an offline execution of a program to share with a third party.
@@ -52,12 +53,15 @@ impl<N: Network> ProgramManager<N> {
         );
 
         // Create an ephemeral SnarkVM to store the programs
-        let store = ConsensusStore::<N, ConsensusMemory<N>>::open(None)?;
-        let vm = VM::<N, ConsensusMemory<N>>::from(store)?;
+        let vm: VM<N, ConsensusMemory<N>> =
+            VM::from(ConsensusStore::open(StorageMode::new_test(None))?)?;
+
+        // let store = ConsensusStore::<N, ConsensusMemory<N>>::open(None)?;
+        // let vm = VM::<N, ConsensusMemory<N>>::from(store)?;
         let credits_id = ProgramID::<N>::from_str("credits.aleo")?;
         imports.iter().try_for_each(|program| {
             if &credits_id != program.id() {
-                vm.process().write().add_program(program)?
+                let _ = vm.process().write().add_program(program);
             }
             Ok::<(), Error>(())
         })?;
@@ -69,7 +73,7 @@ impl<N: Network> ProgramManager<N> {
         // Compute the trace
         let locator = Locator::new(*program_id, function_name);
         let (response, mut trace) = vm.process().write().execute::<A, _>(authorization, rng)?;
-        trace.prepare(query)?;
+        trace.prepare(& query)?;
         let execution = trace.prove_execution::<A, _>(&locator.to_string(), VarunaVersion::V2, &mut rand::thread_rng())?;
 
         // Get the public outputs
@@ -165,7 +169,8 @@ impl<N: Network> ProgramManager<N> {
     ) -> Result<Transaction<N>> {
         // Initialize an RNG and query object for the transaction
         let rng = &mut rand::thread_rng();
-        let query = Query::from(node_url);
+        // let query = Query::from(node_url);
+        println!("node_url {node_url:?}");
 
         // Check that the function exists in the program
         let function_name = function.try_into().map_err(|_| anyhow!("Invalid function name"))?;
@@ -181,7 +186,7 @@ impl<N: Network> ProgramManager<N> {
             let credits_id = ProgramID::<N>::from_str("credits.aleo")?;
             api_client.get_program_imports_from_source(program)?.iter().try_for_each(|(_, import)| {
                 if import.id() != &credits_id && !vm.process().read().contains_program(import.id()) {
-                    vm.process().write().add_program(import)?
+                    let _ = vm.process().write().add_program(import);
                 }
                 Ok::<_, Error>(())
             })?;
@@ -191,10 +196,10 @@ impl<N: Network> ProgramManager<N> {
             if !vm.process().read().contains_program(program.id()) {
                 vm.process().write().add_program(program)?;
             }
-            vm.execute(private_key, (program_id, function_name), inputs, fee_record, priority_fee, Some(query), rng)
+            vm.execute(private_key, (program_id, function_name), inputs, fee_record, priority_fee, None, rng)
         } else {
             let vm = Self::initialize_vm(api_client, program, true)?;
-            vm.execute(private_key, (program_id, function_name), inputs, fee_record, priority_fee, Some(query), rng)
+            vm.execute(private_key, (program_id, function_name), inputs, fee_record, priority_fee, None, rng)
         }
     }
 
@@ -236,7 +241,7 @@ impl<N: Network> ProgramManager<N> {
 
         let locator = Locator::new(*program_id, function_name);
         let (_, mut trace) = vm.process().write().execute::<A, _>(authorization, rng)?;
-        trace.prepare(query)?;
+        trace.prepare(& query)?;
         let execution = trace.prove_execution::<A, _>(&locator.to_string(), VarunaVersion::V2, &mut rand::thread_rng())?;
         execution_cost_v2(&vm.process().write(), &execution)
     }

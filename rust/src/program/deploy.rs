@@ -15,6 +15,7 @@
 // along with the Aleo SDK library. If not, see <https://www.gnu.org/licenses/>.
 
 use super::*;
+use snarkvm_ledger_query::QueryTrait;
 
 impl<N: Network> ProgramManager<N> {
     /// Deploy a program to the network
@@ -94,13 +95,13 @@ impl<N: Network> ProgramManager<N> {
 
         // Attempt to construct the transaction
         println!("Building transaction..");
-        let query = self.api_client.as_ref().unwrap().base_url();
+        let query = Query::<N, BlockMemory<N>>::from(self.api_client()?.base_url());
         let transaction = Self::create_deploy_transaction(
             &program,
             &private_key,
             priority_fee,
             fee_record,
-            query.to_string(),
+            self.api_client()?.base_url().to_string(),
             self.api_client()?,
             &self.vm,
         )?;
@@ -135,17 +136,17 @@ impl<N: Network> ProgramManager<N> {
     ) -> Result<Transaction<N>> {
         // Initialize an RNG.
         let rng = &mut rand::thread_rng();
-        let query = Query::from(node_url);
+        // let query = Query::from(node_url);
 
         if let Some(vm) = vm {
             // Create the deployment transaction
-            vm.deploy(private_key, program, fee_record, priority_fee, Some(query), rng)
+            vm.deploy(private_key, program, fee_record, priority_fee, None, rng)
         } else {
             // Initialize the VM
             let vm = Self::initialize_vm(api_client, program, false)?;
 
             // Create the deployment transaction
-            vm.deploy(private_key, program, fee_record, priority_fee, Some(query), rng)
+            vm.deploy(private_key, program, fee_record, priority_fee, None, rng)
         }
     }
 

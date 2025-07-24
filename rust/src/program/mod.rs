@@ -16,6 +16,7 @@
 
 //! Tools for deploying, executing, and managing programs on the Aleo network
 
+use aleo_std::StorageMode;
 use super::*;
 
 pub mod deploy;
@@ -75,8 +76,8 @@ impl<N: Network> ProgramManager<N> {
         }
         let programs = IndexMap::new();
         let vm = if use_cache {
-            let store = ConsensusStore::<N, ConsensusMemory<N>>::open(None)?;
-            Some(VM::<N, ConsensusMemory<N>>::from(store)?)
+            let vm = VM::from(ConsensusStore::open(StorageMode::new_test(None))?)?;
+            Some(vm)
         } else {
             None
         };
@@ -100,14 +101,13 @@ impl<N: Network> ProgramManager<N> {
     ) -> Result<VM<N, ConsensusMemory<N>>> {
         // Create an ephemeral SnarkVM to store the programs
         // Initialize an RNG and query object for the transaction
-        let store = ConsensusStore::<N, ConsensusMemory<N>>::open(None)?;
-        let vm = VM::<N, ConsensusMemory<N>>::from(store)?;
+        let vm = VM::from(ConsensusStore::open(StorageMode::new_test(None))?)?;
 
         // Resolve imports
         let credits_id = ProgramID::<N>::from_str("credits.aleo")?;
         api_client.get_program_imports_from_source(program)?.iter().try_for_each(|(_, import)| {
             if import.id() != &credits_id {
-                vm.process().write().add_program(import)?
+                let _ = vm.process().write().add_program(import);
             }
             Ok::<_, Error>(())
         })?;

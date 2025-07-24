@@ -33,7 +33,7 @@ impl<N: Network> ProgramManager<N> {
         }
 
         // Specify the network state query
-        let query = Query::from(self.api_client.as_ref().unwrap().base_url());
+        // let query = Query::from(self.api_client.as_ref().unwrap().base_url());
 
         // Retrieve the private key.
         let private_key = self.get_private_key(None)?;
@@ -43,8 +43,8 @@ impl<N: Network> ProgramManager<N> {
             let rng = &mut rand::thread_rng();
 
             // Initialize a VM
-            let store = ConsensusStore::<N, ConsensusMemory<N>>::open(None)?;
-            let vm = VM::from(store)?;
+            let vm: VM<N, ConsensusMemory<N>> =
+                VM::from(ConsensusStore::open(StorageMode::new_test(None))?)?;
 
             // Create a new transaction.
             vm.execute(
@@ -56,7 +56,7 @@ impl<N: Network> ProgramManager<N> {
                 ].iter(),
                 fee_record,
                 fee,
-                Some(query),
+                None,
                 rng,
             )?
         };

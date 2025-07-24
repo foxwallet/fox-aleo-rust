@@ -28,6 +28,9 @@ name = "private-key-encryption-at-rest"
 path = "benches/private_key_encryption.rs"
 harness = false
 
+[dependencies]
+aleo-std = "1.0.1"
+
 [dependencies.anyhow]
 version = "1"
 
