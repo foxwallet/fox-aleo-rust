@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with the Aleo SDK library. If not, see <https://www.gnu.org/licenses/>.
 
+use snarkvm::prelude::ConsensusVersion;
 use super::*;
 use snarkvm_ledger_query::QueryTrait;
 
@@ -95,7 +96,7 @@ impl<N: Network> ProgramManager<N> {
 
         // Attempt to construct the transaction
         println!("Building transaction..");
-        let query = Query::<N, BlockMemory<N>>::from(self.api_client()?.base_url());
+        // let query = Query::<N, BlockMemory<N>>::from(self.api_client()?.base_url());
         let transaction = Self::create_deploy_transaction(
             &program,
             &private_key,
@@ -159,8 +160,8 @@ impl<N: Network> ProgramManager<N> {
         let rng = &mut rand::thread_rng();
         let private_key = PrivateKey::<N>::new(rng)?;
         let deployment = vm.deploy(&private_key, program, None, 0u64, None, rng)?;
-        let (minimum_deployment_cost, (storage_cost, namespace_cost, _)) =
-            deployment_cost::<N>(deployment.deployment().ok_or(anyhow!("Deployment failed"))?)?;
+        let (minimum_deployment_cost, (storage_cost, _, _, namespace_cost)) =
+            deployment_cost::<N>(&vm.process().write(), deployment.deployment().ok_or(anyhow!("Deployment failed"))?, ConsensusVersion::V10)?;
         Ok((minimum_deployment_cost, (storage_cost, namespace_cost)))
     }
 

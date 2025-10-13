@@ -15,6 +15,7 @@
 // along with the Aleo SDK library. If not, see <https://www.gnu.org/licenses/>.
 
 use super::*;
+use anyhow::Context;
 
 impl<N: Network> ProgramManager<N> {
     /// Executes a transfer to the specified recipient_address with the specified amount and fee.
@@ -35,7 +36,9 @@ impl<N: Network> ProgramManager<N> {
 
         // Specify the network state query
         // let query = Query::from(self.api_client.as_ref().unwrap().base_url());
-        let query = Query::<_, BlockMemory<_>>::from(self.api_client.as_ref().unwrap().base_url());
+        // let query = Query::<_, BlockMemory<_>>::from(self.api_client.as_ref().unwrap().base_url());
+        let query = Query::<_, BlockMemory<_>>::try_from(self.api_client.as_ref().unwrap().base_url()).with_context(|| "Failed to parse endpoint")?;
+
 
         // Retrieve the private key.
         let private_key = self.get_private_key(None)?;

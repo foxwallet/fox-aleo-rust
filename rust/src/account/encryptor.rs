@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with the Aleo SDK library. If not, see <https://www.gnu.org/licenses/>.
 
+use std::sync::OnceLock;
 use super::*;
 
 /// Tool for encrypting and decrypting Aleo key material into ciphertext
@@ -51,7 +52,7 @@ impl<N: Network> Encryptor<N> {
                 (Identifier::from_str("key")?, Plaintext::<N>::from(Literal::Field(key))),
                 (Identifier::from_str("nonce")?, Plaintext::<N>::from(Literal::Field(nonce))),
             ]),
-            OnceCell::new(),
+            OnceLock::new(),
         );
         plaintext.encrypt_symmetric(secret)
     }

@@ -16,6 +16,7 @@
 
 use super::*;
 use aleo_std::StorageMode;
+use anyhow::Context;
 
 impl<N: Network> ProgramManager<N> {
     /// Create an offline execution of a program to share with a third party.
@@ -41,7 +42,8 @@ impl<N: Network> ProgramManager<N> {
     ) -> Result<OfflineExecution<N>> {
         // Initialize an RNG and query object for the transaction
         let rng = &mut rand::thread_rng();
-        let query = Query::<N, BlockMemory<N>>::from(url);
+        // let query = Query::<N, BlockMemory<N>>::from(url);
+        let query = Query::<_, BlockMemory<_>>::try_from(url).with_context(|| "Failed to parse endpoint")?;
 
         // Check that the function exists in the program
         let function_name = function.try_into().map_err(|_| anyhow!("Invalid function name"))?;
@@ -230,7 +232,8 @@ impl<N: Network> ProgramManager<N> {
         // Create an ephemeral SnarkVM to store the programs
         // Initialize an RNG and query object for the transaction
         let rng = &mut rand::thread_rng();
-        let query = Query::<N, BlockMemory<N>>::from(url);
+        // let query = Query::<N, BlockMemory<N>>::from(url);
+        let query = Query::<_, BlockMemory<_>>::try_from(url).with_context(|| "Failed to parse endpoint")?;
         let vm = Self::initialize_vm(self.api_client()?, program, true)?;
 
         // Create an ephemeral private key for the sample execution
