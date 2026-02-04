@@ -39,14 +39,14 @@ impl<N: Network> AleoAPIClient<N> {
         );
         Ok(AleoAPIClient {
             client,
-            base_url: base_url.to_string(),
+            base_url: base_url.to_string()+ "/v2",
             network_id: chain.to_string(),
             _network: PhantomData,
         })
     }
 
     pub fn testnet() -> Self {
-        Self::new("https://api.explorer.aleo.org/v1", "testnet").unwrap()
+        Self::new("https://api.explorer.provable.com/v2", "testnet").unwrap()
     }
 
     pub fn local_testnet(port: &str) -> Self {
@@ -54,7 +54,7 @@ impl<N: Network> AleoAPIClient<N> {
     }
 
     pub fn mainnet() -> Self {
-        Self::new("https://api.explorer.aleo.org/v1", "mainnet").unwrap()
+        Self::new("https://api.explorer.provable.com/v2", "mainnet").unwrap()
     }
 
     pub fn local_mainnet(port: &str) -> Self {

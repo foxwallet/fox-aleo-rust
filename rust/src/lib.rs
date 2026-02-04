@@ -228,7 +228,7 @@ pub mod snarkvm_types {
         ConsensusStore,
     };
     pub use snarkvm_synthesizer::{
-        prelude::{deployment_cost, execution_cost_v1, execution_cost_v2, cost_in_microcredits_v1, cost_in_microcredits_v2},
+        prelude::{deployment_cost, execution_cost, cost_in_microcredits_v1, cost_in_microcredits_v2},
         snark::{Proof, ProvingKey, VerifyingKey},
         Process,
         Program,

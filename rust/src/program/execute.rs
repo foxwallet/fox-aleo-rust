@@ -17,6 +17,7 @@
 use super::*;
 use aleo_std::StorageMode;
 use anyhow::Context;
+use snarkvm::prelude::ConsensusVersion;
 
 impl<N: Network> ProgramManager<N> {
     /// Create an offline execution of a program to share with a third party.
@@ -246,7 +247,7 @@ impl<N: Network> ProgramManager<N> {
         let (_, mut trace) = vm.process().write().execute::<A, _>(authorization, rng)?;
         trace.prepare(& query)?;
         let execution = trace.prove_execution::<A, _>(&locator.to_string(), VarunaVersion::V2, &mut rand::thread_rng())?;
-        execution_cost_v2(&vm.process().write(), &execution)
+        execution_cost(&vm.process().write(), &execution, ConsensusVersion::V8)
     }
 
     /// Estimate the finalize fee component for executing a function. This fee is additional to the
