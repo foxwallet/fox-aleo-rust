@@ -173,6 +173,7 @@ impl<N: Network> ProgramManager<N> {
 mod tests {
 
     use super::*;
+    use snarkvm_synthesizer::program::StackTrait;
     use crate::{
         test_utils::{HELLO_PROGRAM, HELLO_PROGRAM_2},
         RECIPIENT_PRIVATE_KEY,
@@ -308,23 +309,23 @@ mod tests {
         let vm_deploy = ProgramManager::<MainnetV0>::initialize_vm(&api_client, &top_level_program, false).unwrap();
 
         // Ensure the initialization contained all imported programs
-        let top_program = vm_execute.process().get_program("imported_add_mul.aleo").unwrap().clone();
+        let top_program = vm_execute.process().get_stack("imported_add_mul.aleo").unwrap().program().clone();
         assert_eq!(top_level_program, top_program);
-        let add_import = vm_execute.process().get_program("addition_test.aleo").unwrap().clone();
+        let add_import = vm_execute.process().get_stack("addition_test.aleo").unwrap().program().clone();
         assert_eq!(add_program, add_import);
-        let multiply_import = vm_execute.process().get_program("multiply_test.aleo").unwrap().clone();
+        let multiply_import = vm_execute.process().get_stack("multiply_test.aleo").unwrap().program().clone();
         assert_eq!(multiply_program, multiply_import);
-        let double_import = vm_execute.process().get_program("double_test.aleo").unwrap().clone();
+        let double_import = vm_execute.process().get_stack("double_test.aleo").unwrap().program().clone();
         assert_eq!(double_program, double_import);
 
         // Ensure the initialization contained all imported programs except the top level program
-        let top_program = vm_deploy.process().get_program("imported_add_mul.aleo").cloned();
+        let top_program = vm_deploy.process().get_stack("imported_add_mul.aleo");
         assert!(top_program.is_err());
-        let add_import = vm_deploy.process().get_program("addition_test.aleo").unwrap().clone();
+        let add_import = vm_deploy.process().get_stack("addition_test.aleo").unwrap().program().clone();
         assert_eq!(add_program, add_import);
-        let multiply_import = vm_deploy.process().get_program("multiply_test.aleo").unwrap().clone();
+        let multiply_import = vm_deploy.process().get_stack("multiply_test.aleo").unwrap().program().clone();
         assert_eq!(multiply_program, multiply_import);
-        let double_import = vm_deploy.process().get_program("double_test.aleo").unwrap().clone();
+        let double_import = vm_deploy.process().get_stack("double_test.aleo").unwrap().program().clone();
         assert_eq!(double_program, double_import);
     }
 }

@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with the Aleo SDK library. If not, see <https://www.gnu.org/licenses/>.
 
-use snarkvm::prelude::ConsensusVersion;
 use super::*;
 use snarkvm_ledger_query::QueryTrait;
 
@@ -160,8 +159,9 @@ impl<N: Network> ProgramManager<N> {
         let rng = &mut rand::rng();
         let private_key = PrivateKey::<N>::new(rng)?;
         let deployment = vm.deploy(&private_key, program, None, 0u64, None, rng)?;
+        let versions = ProtocolVersions::at_height::<N>(self.api_client()?.latest_height()?)?;
         let (minimum_deployment_cost, (storage_cost, _, _, namespace_cost)) =
-            deployment_cost::<N>(&vm.process(), deployment.deployment().ok_or(anyhow!("Deployment failed"))?, ConsensusVersion::V10)?;
+            deployment_cost::<N>(&vm.process(), deployment.deployment().ok_or(anyhow!("Deployment failed"))?, versions.consensus)?;
         Ok((minimum_deployment_cost, (storage_cost, namespace_cost)))
     }
 

@@ -17,7 +17,7 @@
 use super::*;
 use aleo_std::StorageMode;
 use anyhow::Context;
-use snarkvm::prelude::ConsensusVersion;
+use snarkvm_ledger_query::QueryTrait;
 
 impl<N: Network> ProgramManager<N> {
     /// Create an offline execution of a program to share with a third party.
@@ -77,7 +77,8 @@ impl<N: Network> ProgramManager<N> {
         let locator = Locator::new(*program_id, function_name);
         let (response, mut trace) = vm.process().execute::<A, _>(authorization, rng)?;
         trace.prepare(& query)?;
-        let execution = trace.prove_execution::<A, _>(&locator.to_string(), VarunaVersion::V2, &mut rand::rng())?;
+        let versions = ProtocolVersions::at_height::<N>(query.current_block_height()?)?;
+        let execution = trace.prove_execution::<A, _>(&locator.to_string(), versions.varuna, &mut rand::rng())?;
 
         // Get the public outputs
         let mut public_outputs = vec![];
@@ -91,7 +92,7 @@ impl<N: Network> ProgramManager<N> {
         let response = if include_outputs { Some(response) } else { None };
 
         // Return the execution
-        Ok(OfflineExecution::new(execution, response, trace, Some(public_outputs)))
+        Ok(OfflineExecution::new(execution, response, trace, Some(public_outputs), versions))
     }
 
     /// Execute a program function on the Aleo Network.
@@ -246,8 +247,9 @@ impl<N: Network> ProgramManager<N> {
         let locator = Locator::new(*program_id, function_name);
         let (_, mut trace) = vm.process().execute::<A, _>(authorization, rng)?;
         trace.prepare(& query)?;
-        let execution = trace.prove_execution::<A, _>(&locator.to_string(), VarunaVersion::V2, &mut rand::rng())?;
-        execution_cost(&vm.process(), &execution, ConsensusVersion::V8)
+        let versions = ProtocolVersions::at_height::<N>(query.current_block_height()?)?;
+        let execution = trace.prove_execution::<A, _>(&locator.to_string(), versions.varuna, &mut rand::rng())?;
+        execution_cost(&vm.process(), &execution, versions.consensus)
     }
 
     /// Estimate the finalize fee component for executing a function. This fee is additional to the

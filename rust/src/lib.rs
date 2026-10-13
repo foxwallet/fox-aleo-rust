@@ -179,7 +179,7 @@ pub use api::AleoAPIClient;
 pub mod program;
 #[cfg(feature = "full")]
 #[doc(inline)]
-pub use program::{OnChainProgramState, ProgramManager, RecordFinder, TransferType};
+pub use program::{OnChainProgramState, ProgramManager, ProtocolVersions, RecordFinder, TransferType};
 
 #[cfg(test)]
 #[cfg(feature = "full")]

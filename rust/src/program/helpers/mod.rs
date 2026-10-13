@@ -25,6 +25,9 @@ pub use state::*;
 pub mod records;
 pub use records::*;
 
+pub mod versions;
+pub use versions::*;
+
 /// Transfer Type to Perform
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum TransferType {

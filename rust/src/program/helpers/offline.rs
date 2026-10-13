@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with the Aleo SDK library. If not, see <https://www.gnu.org/licenses/>.
 
-use snarkvm::prelude::InclusionVersion;
 use super::*;
 
 /// Offline Execution of a program
@@ -24,6 +23,7 @@ pub struct OfflineExecution<N: Network> {
     response: Option<Response<N>>,
     trace: Trace<N>,
     public_outputs: Option<Vec<Value<N>>>,
+    versions: ProtocolVersions,
 }
 
 impl<N: Network> OfflineExecution<N> {
@@ -33,8 +33,14 @@ impl<N: Network> OfflineExecution<N> {
         response: Option<Response<N>>,
         trace: Trace<N>,
         public_outputs: Option<Vec<Value<N>>>,
+        versions: ProtocolVersions,
     ) -> Self {
-        Self { execution, response, trace, public_outputs }
+        Self { execution, response, trace, public_outputs, versions }
+    }
+
+    /// Get the protocol versions the execution was proven with
+    pub fn versions(&self) -> ProtocolVersions {
+        self.versions
     }
 
     /// Get the execution
@@ -75,6 +81,6 @@ impl<N: Network> OfflineExecution<N> {
         verifier_inputs: Vec<(VerifyingKey<N>, Vec<Vec<N::Field>>)>,
         execution: &Execution<N>,
     ) -> Result<(), String> {
-        Trace::verify_execution_proof(locator, VarunaVersion::V2, InclusionVersion::V1, verifier_inputs, execution).map_err(|e| e.to_string())
+        Trace::verify_execution_proof(locator, self.versions.varuna, self.versions.inclusion, verifier_inputs, execution).map_err(|e| e.to_string())
     }
 }

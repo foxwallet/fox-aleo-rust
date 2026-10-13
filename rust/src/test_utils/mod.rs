@@ -143,13 +143,13 @@ pub const RECORD_5_MICROCREDITS: &str = r"{
 
 /// Get a random program id
 pub fn random_program_id(len: usize) -> String {
-    use rand::Rng;
+    use rand::RngExt;
     const CHARSET: &[u8] = b"abcdefghijklmnopqrstuvwxyz";
     let mut rng = rand::rng();
 
     let program: String = (0..len)
         .map(|_| {
-            let idx = rng.gen_range(0..CHARSET.len());
+            let idx = rng.random_range(0..CHARSET.len());
             CHARSET[idx] as char
         })
         .collect();
