@@ -104,7 +104,7 @@ mod tests {
 
     #[test]
     fn test_file_loading_and_imports() {
-        let private_key = PrivateKey::<MainnetV0>::new(&mut rand::thread_rng()).unwrap();
+        let private_key = PrivateKey::<MainnetV0>::new(&mut rand::rng()).unwrap();
         let credits = Program::<MainnetV0>::credits().unwrap().to_string();
         let imports = vec![("credits.aleo", credits.as_str()), ("hello.aleo", HELLO_PROGRAM)];
         let test_path = setup_directory("aleo_test_file_resolution", IMPORT_PROGRAM, imports).unwrap();

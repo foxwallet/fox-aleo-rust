@@ -145,7 +145,7 @@ pub const RECORD_5_MICROCREDITS: &str = r"{
 pub fn random_program_id(len: usize) -> String {
     use rand::Rng;
     const CHARSET: &[u8] = b"abcdefghijklmnopqrstuvwxyz";
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
 
     let program: String = (0..len)
         .map(|_| {

@@ -49,7 +49,7 @@ impl<N: Network> ProgramManager<N> {
 
         // Generate the execution transaction
         let execution = {
-            let rng = &mut rand::thread_rng();
+            let rng = &mut rand::rng();
 
             // Initialize a VM
             let vm: VM<N, ConsensusMemory<N>> =

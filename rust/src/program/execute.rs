@@ -42,7 +42,7 @@ impl<N: Network> ProgramManager<N> {
         url: &str,
     ) -> Result<OfflineExecution<N>> {
         // Initialize an RNG and query object for the transaction
-        let rng = &mut rand::thread_rng();
+        let rng = &mut rand::rng();
         // let query = Query::<N, BlockMemory<N>>::from(url);
         let query = Query::<_, BlockMemory<_>>::try_from(url).with_context(|| "Failed to parse endpoint")?;
 
@@ -64,20 +64,20 @@ impl<N: Network> ProgramManager<N> {
         let credits_id = ProgramID::<N>::from_str("credits.aleo")?;
         imports.iter().try_for_each(|program| {
             if &credits_id != program.id() {
-                let _ = vm.process().write().add_program(program);
+                let _ = vm.process().lock().add_program(program);
             }
             Ok::<(), Error>(())
         })?;
-        let _ = vm.process().write().add_program(program);
+        let _ = vm.process().lock().add_program(program);
 
         // Compute the authorization.
         let authorization = vm.authorize(private_key, program_id, function_name, inputs, rng)?;
 
         // Compute the trace
         let locator = Locator::new(*program_id, function_name);
-        let (response, mut trace) = vm.process().write().execute::<A, _>(authorization, rng)?;
+        let (response, mut trace) = vm.process().execute::<A, _>(authorization, rng)?;
         trace.prepare(& query)?;
-        let execution = trace.prove_execution::<A, _>(&locator.to_string(), VarunaVersion::V2, &mut rand::thread_rng())?;
+        let execution = trace.prove_execution::<A, _>(&locator.to_string(), VarunaVersion::V2, &mut rand::rng())?;
 
         // Get the public outputs
         let mut public_outputs = vec![];
@@ -171,7 +171,7 @@ impl<N: Network> ProgramManager<N> {
         vm: &Option<VM<N, ConsensusMemory<N>>>,
     ) -> Result<Transaction<N>> {
         // Initialize an RNG and query object for the transaction
-        let rng = &mut rand::thread_rng();
+        let rng = &mut rand::rng();
         // let query = Query::from(node_url);
         println!("node_url {node_url:?}");
 
@@ -188,21 +188,21 @@ impl<N: Network> ProgramManager<N> {
         if let Some(vm) = vm {
             let credits_id = ProgramID::<N>::from_str("credits.aleo")?;
             api_client.get_program_imports_from_source(program)?.iter().try_for_each(|(_, import)| {
-                if import.id() != &credits_id && !vm.process().read().contains_program(import.id()) {
-                    let _ = vm.process().write().add_program(import);
+                if import.id() != &credits_id && !vm.process().contains_program(import.id()) {
+                    let _ = vm.process().lock().add_program(import);
                 }
                 Ok::<_, Error>(())
             })?;
 
             // If the initialization is for an execution, add the program. Otherwise, don't add it as
             // it will be added during the deployment process
-            if !vm.process().read().contains_program(program.id()) {
-                vm.process().write().add_program(program)?;
+            if !vm.process().contains_program(program.id()) {
+                vm.process().lock().add_program(program)?;
             }
-            vm.execute(private_key, (program_id, function_name), inputs, fee_record, priority_fee, None, rng)
+            Ok(vm.execute(private_key, (program_id, function_name), inputs, fee_record, priority_fee, None, rng)?)
         } else {
             let vm = Self::initialize_vm(api_client, program, true)?;
-            vm.execute(private_key, (program_id, function_name), inputs, fee_record, priority_fee, None, rng)
+            Ok(vm.execute(private_key, (program_id, function_name), inputs, fee_record, priority_fee, None, rng)?)
         }
     }
 
@@ -232,7 +232,7 @@ impl<N: Network> ProgramManager<N> {
 
         // Create an ephemeral SnarkVM to store the programs
         // Initialize an RNG and query object for the transaction
-        let rng = &mut rand::thread_rng();
+        let rng = &mut rand::rng();
         // let query = Query::<N, BlockMemory<N>>::from(url);
         let query = Query::<_, BlockMemory<_>>::try_from(url).with_context(|| "Failed to parse endpoint")?;
         let vm = Self::initialize_vm(self.api_client()?, program, true)?;
@@ -244,10 +244,10 @@ impl<N: Network> ProgramManager<N> {
         let authorization = vm.authorize(&private_key, program_id, function_name, inputs, rng)?;
 
         let locator = Locator::new(*program_id, function_name);
-        let (_, mut trace) = vm.process().write().execute::<A, _>(authorization, rng)?;
+        let (_, mut trace) = vm.process().execute::<A, _>(authorization, rng)?;
         trace.prepare(& query)?;
-        let execution = trace.prove_execution::<A, _>(&locator.to_string(), VarunaVersion::V2, &mut rand::thread_rng())?;
-        execution_cost(&vm.process().write(), &execution, ConsensusVersion::V8)
+        let execution = trace.prove_execution::<A, _>(&locator.to_string(), VarunaVersion::V2, &mut rand::rng())?;
+        execution_cost(&vm.process(), &execution, ConsensusVersion::V8)
     }
 
     /// Estimate the finalize fee component for executing a function. This fee is additional to the
@@ -261,11 +261,11 @@ impl<N: Network> ProgramManager<N> {
         // Check if the function exists in the program
         program.get_function(&function_name)?;
         // Initialize a process.
-        let process = Process::setup::<A, _>(&mut rand::thread_rng())?;
+        let process = Process::setup::<A, _>(&mut rand::rng())?;
         // TODO: should we just ensure self contains a process? Or generate one optionally on the fly?
         // let process = match &self.vm {
         //     Some(vm) => Cow::new(vm.process().deref().read()),
-        //     None => Cow::new(Process::setup::<A, _>(&mut rand::thread_rng())?),
+        //     None => Cow::new(Process::setup::<A, _>(&mut rand::rng())?),
         // };
         // Compute finalize cost.
         let stack = Stack::new(&process, &program)?;
@@ -452,7 +452,7 @@ mod tests {
 
     #[test]
     fn test_execution_failure_modes() {
-        let rng = &mut rand::thread_rng();
+        let rng = &mut rand::rng();
         let recipient_private_key = PrivateKey::<MainnetV0>::new(rng).unwrap();
         let api_client = AleoAPIClient::<MainnetV0>::mainnet();
         let record_5_microcredits = Record::<MainnetV0, Plaintext<MainnetV0>>::from_str(RECORD_5_MICROCREDITS).unwrap();

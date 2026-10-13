@@ -107,7 +107,7 @@ impl<N: Network> ProgramManager<N> {
         let credits_id = ProgramID::<N>::from_str("credits.aleo")?;
         api_client.get_program_imports_from_source(program)?.iter().try_for_each(|(_, import)| {
             if import.id() != &credits_id {
-                let _ = vm.process().write().add_program(import);
+                let _ = vm.process().lock().add_program(import);
             }
             Ok::<_, Error>(())
         })?;
@@ -115,7 +115,7 @@ impl<N: Network> ProgramManager<N> {
         // If the initialization is for an execution, add the program. Otherwise, don't add it as
         // it will be added during the deployment process
         if initialize_execution {
-            vm.process().write().add_program(program)?;
+            vm.process().lock().add_program(program)?;
         }
         Ok(vm)
     }
@@ -308,23 +308,23 @@ mod tests {
         let vm_deploy = ProgramManager::<MainnetV0>::initialize_vm(&api_client, &top_level_program, false).unwrap();
 
         // Ensure the initialization contained all imported programs
-        let top_program = vm_execute.process().read().get_program("imported_add_mul.aleo").unwrap().clone();
+        let top_program = vm_execute.process().get_program("imported_add_mul.aleo").unwrap().clone();
         assert_eq!(top_level_program, top_program);
-        let add_import = vm_execute.process().read().get_program("addition_test.aleo").unwrap().clone();
+        let add_import = vm_execute.process().get_program("addition_test.aleo").unwrap().clone();
         assert_eq!(add_program, add_import);
-        let multiply_import = vm_execute.process().read().get_program("multiply_test.aleo").unwrap().clone();
+        let multiply_import = vm_execute.process().get_program("multiply_test.aleo").unwrap().clone();
         assert_eq!(multiply_program, multiply_import);
-        let double_import = vm_execute.process().read().get_program("double_test.aleo").unwrap().clone();
+        let double_import = vm_execute.process().get_program("double_test.aleo").unwrap().clone();
         assert_eq!(double_program, double_import);
 
         // Ensure the initialization contained all imported programs except the top level program
-        let top_program = vm_deploy.process().read().get_program("imported_add_mul.aleo").cloned();
+        let top_program = vm_deploy.process().get_program("imported_add_mul.aleo").cloned();
         assert!(top_program.is_err());
-        let add_import = vm_deploy.process().read().get_program("addition_test.aleo").unwrap().clone();
+        let add_import = vm_deploy.process().get_program("addition_test.aleo").unwrap().clone();
         assert_eq!(add_program, add_import);
-        let multiply_import = vm_deploy.process().read().get_program("multiply_test.aleo").unwrap().clone();
+        let multiply_import = vm_deploy.process().get_program("multiply_test.aleo").unwrap().clone();
         assert_eq!(multiply_program, multiply_import);
-        let double_import = vm_deploy.process().read().get_program("double_test.aleo").unwrap().clone();
+        let double_import = vm_deploy.process().get_program("double_test.aleo").unwrap().clone();
         assert_eq!(double_program, double_import);
     }
 }

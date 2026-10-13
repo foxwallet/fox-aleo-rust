@@ -136,18 +136,18 @@ impl<N: Network> ProgramManager<N> {
         vm: &Option<VM<N, ConsensusMemory<N>>>,
     ) -> Result<Transaction<N>> {
         // Initialize an RNG.
-        let rng = &mut rand::thread_rng();
+        let rng = &mut rand::rng();
         // let query = Query::from(node_url);
 
         if let Some(vm) = vm {
             // Create the deployment transaction
-            vm.deploy(private_key, program, fee_record, priority_fee, None, rng)
+            Ok(vm.deploy(private_key, program, fee_record, priority_fee, None, rng)?)
         } else {
             // Initialize the VM
             let vm = Self::initialize_vm(api_client, program, false)?;
 
             // Create the deployment transaction
-            vm.deploy(private_key, program, fee_record, priority_fee, None, rng)
+            Ok(vm.deploy(private_key, program, fee_record, priority_fee, None, rng)?)
         }
     }
 
@@ -157,11 +157,11 @@ impl<N: Network> ProgramManager<N> {
     /// Disclaimer: Fee estimation is experimental and may not represent a correct estimate on any current or future network
     pub fn estimate_deployment_fee<A: Aleo<Network = N>>(&self, program: &Program<N>) -> Result<(u64, (u64, u64))> {
         let vm = Self::initialize_vm(self.api_client()?, program, false)?;
-        let rng = &mut rand::thread_rng();
+        let rng = &mut rand::rng();
         let private_key = PrivateKey::<N>::new(rng)?;
         let deployment = vm.deploy(&private_key, program, None, 0u64, None, rng)?;
         let (minimum_deployment_cost, (storage_cost, _, _, namespace_cost)) =
-            deployment_cost::<N>(&vm.process().write(), deployment.deployment().ok_or(anyhow!("Deployment failed"))?, ConsensusVersion::V10)?;
+            deployment_cost::<N>(&vm.process(), deployment.deployment().ok_or(anyhow!("Deployment failed"))?, ConsensusVersion::V10)?;
         Ok((minimum_deployment_cost, (storage_cost, namespace_cost)))
     }
 
@@ -305,7 +305,7 @@ mod tests {
 
     #[test]
     fn test_deploy_failure_conditions() {
-        let rng = &mut rand::thread_rng();
+        let rng = &mut rand::rng();
         let recipient_private_key = PrivateKey::<MainnetV0>::new(rng).unwrap();
         let record_5_microcredits = Record::<MainnetV0, Plaintext<MainnetV0>>::from_str(RECORD_5_MICROCREDITS).unwrap();
         let record_2000000001_microcredits =
